@@ -1,0 +1,27 @@
+from flask import Flask, request
+
+app = Flask(__name__)
+
+# Home route
+@app.route('/')
+def home():
+    return "GymTrack API is running"
+
+
+# Signup route
+@app.route('/signup', methods=['POST'])
+def signup():
+    data = request.json
+    
+    name = data.get('name')
+    email = data.get('email')
+
+    return {
+        "message": "User received",
+        "name": name,
+        "email": email
+    }
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
