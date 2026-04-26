@@ -108,5 +108,52 @@ def get_workouts():
 
     return output
 
+@app.route('/workouts/<int:user_id>', methods=['GET'])
+def get_workouts_by_user(user_id):
+    workouts = Workout.query.filter_by(user_id=user_id).all()
+
+    output = []
+    for workout in workouts:
+        output.append({
+            "id": workout.id,
+            "exercise": workout.exercise_name,
+            "sets": workout.sets,
+            "reps": workout.reps,
+            "weight": workout.weight,
+            "date": workout.date
+        })
+
+    return output
+
+@app.route('/workout/<int:workout_id>', methods=['DELETE'])
+def delete_workout(workout_id):
+    workout = Workout.query.get(workout_id)
+
+    if not workout:
+        return {"message": "Workout not found"}, 404
+
+    db.session.delete(workout)
+    db.session.commit()
+
+    return {"message": "Workout deleted successfully"}
+
+@app.route('/workout/<int:workout_id>', methods=['PUT'])
+def edit_workout(workout_id):
+    workout = Workout.query.get(workout_id)
+
+    if not workout:
+        return {"message": "Workout not found"}, 404
+
+    data = request.json
+    workout.exercise_name = data.get('exercise_name', workout.exercise_name)
+    workout.sets = data.get('sets', workout.sets)
+    workout.reps = data.get('reps', workout.reps)
+    workout.weight = data.get('weight', workout.weight)
+    workout.date = data.get('date', workout.date)
+
+    db.session.commit()
+
+    return {"message": "Workout updated successfully"}
+
 if __name__ == "__main__":
     app.run(debug=True)
