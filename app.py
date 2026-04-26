@@ -13,6 +13,10 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     email = db.Column(db.String(100))
+    age = db.Column(db.Integer)
+    height = db.Column(db.Float)
+    weight = db.Column(db.Float)
+    goal = db.Column(db.String(50))
 
 class Workout(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -164,6 +168,35 @@ def get_records(user_id):
             "max_reps": record.max_reps
         })
     return output
+
+@app.route('/profile/<int:user_id>', methods=['PUT'])
+def update_profile(user_id):
+    user = User.query.get(user_id)
+
+    if not user:
+        return {"message": "User not found"}, 404
+
+    valid_goals = ['fat_loss', 'muscle_gain', 'maintenance']
+    data = request.json
+
+    goal = data.get('goal', user.goal)
+    if goal not in valid_goals:
+        return {"message": f"Invalid goal. Choose from: {valid_goals}"}, 400
+
+    user.age = data.get('age', user.age)
+    user.height = data.get('height', user.height)
+    user.weight = data.get('weight', user.weight)
+    user.goal = goal
+
+    db.session.commit()
+
+    return {
+        "message": "Profile updated successfully",
+        "age": user.age,
+        "height": user.height,
+        "weight": user.weight,
+        "goal": user.goal
+    }
 
 if __name__ == "__main__":
     app.run(debug=True)
